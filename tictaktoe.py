@@ -1,86 +1,99 @@
-import os
+#include <bits/stdc++.h>
+using namespace std;
 
-def printBoard(gameValues):
-    # Printing Board By using gameValues 's List
-    print(f" {gameValues[0]} | {gameValues[1]} | {gameValues[2]} ")
-    print(f"---|---|---")
-    print(f" {gameValues[3]} | {gameValues[4]} | {gameValues[5]} ")
-    print(f"---|---|---")
-    print(f" {gameValues[6]} | {gameValues[7]} | {gameValues[8]} ")
+char board[3][3] = { {'1','2','3'},
+                     {'4','5','6'},
+                     {'7','8','9'} };
 
-def checkWin(gameValues):
-    # All Winning Patterns
-    wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
+char currentMarker;
+int currentPlayer;
 
-    for win in wins:
-        # if gameValues matches with the pattern and has X then X won the Match
-        if(gameValues[win[0]] == gameValues[win[1]] == gameValues[win[2]] == 'X'):
-            printBoard(gameValues)
-            print("X Won the match")
-            return 1
+void drawBoard() {
+    cout << "\n";
+    cout << " " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << "\n";
+    cout << "---|---|---\n";
+    cout << " " << board[1][0] << " | " << board[1][1] << " | " << board[1][2] << "\n";
+    cout << "---|---|---\n";
+    cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << "\n\n";
+}
 
-        # if gameValues matches with the pattern and has X then O won the Match
-        if(gameValues[win[0]] == gameValues[win[1]] == gameValues[win[2]] == 'O'):
-            printBoard(gameValues)
-            print("O Won the match")
-            return 0
+bool placeMarker(int slot) {
+    int row = (slot - 1) / 3;
+    int col = (slot - 1) % 3;
 
-        # if all places are filled and no one is the winner
-        if all(isinstance(item, str) for item in gameValues):
-            printBoard(gameValues)
-            return -2
-    # return -1 if no one wons
-    return -1
+    if (board[row][col] != 'X' && board[row][col] != 'O') {
+        board[row][col] = currentMarker;
+        return true;
+    } else {
+        return false;
+    }
+}
 
-if __name__ == '__main__':
-    print("Welcome to the Game")
-    gameValues=[0, 1, 2, 3, 4, 5, 6, 7, 8]
-    chance = 1
+int checkWinner() {
+    // Rows, Columns, Diagonals
+    for (int i = 0; i < 3; i++) {
+        // Rows
+        if (board[i][0] == board[i][1] && board[i][1] == board[i][2])
+            return currentPlayer;
+        // Columns
+        if (board[0][i] == board[1][i] && board[1][i] == board[2][i])
+            return currentPlayer;
+    }
+    // Diagonals
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2])
+        return currentPlayer;
+    if (board[0][2] == board[1][1] && board[1][1] == board[2][0])
+        return currentPlayer;
 
-    while(True):
-        try:
-            if chance == 1:
-                printBoard(gameValues)
-                print("\nX's Chance")
-                value = int(input("\nPlease enter a value: "))
+    return 0;
+}
 
-                # check if already filled with O
-                if gameValues[value]!= 'O':
-                    gameValues[value] = 'X'
-                else:
-                    os.system('CLS')
-                    print("\nPlease Enter Different Location for X")
-                    continue
-                os.system('CLS')
+void swapPlayerAndMarker() {
+    if (currentMarker == 'X') {
+        currentMarker = 'O';
+        currentPlayer = 2;
+    } else {
+        currentMarker = 'X';
+        currentPlayer = 1;
+    }
+}
 
-            if chance == 0:
-                printBoard(gameValues)
-                print("\nZ's Chance")
-                value = int(input("\nPlease enter a value: "))
+int main() {
+    cout << "TIC TAC TOE GAME\n";
+    cout << "Player 1, choose your marker (X or O): ";
+    cin >> currentMarker;
+    currentPlayer = 1;
 
-                # check if already filled with X
-                if gameValues[value]!= 'X':
-                    gameValues[value] = 'O'
-                else:
-                    os.system('CLS')
-                    print("\nPlease Enter Different Location for O")
-                    continue
-                os.system('CLS')
+    int winner = 0;
+    int moves = 0;
 
-        except IndexError:
-            # exception if Value is not between 0 to 8 
-            os.system('CLS')
-            print("\nOops!! Please Enter value from 0 - 8\n")
-            continue
+    drawBoard();
 
-        # for giving chance to other player
-        chance = 1 - chance
-        cwin = checkWin(gameValues)
-        # Game Draw
-        if(cwin == -2):
-            print("Game Draw")
-            break
-        # Match Over
-        if(cwin != -1):
-            print("Match over")
-            break
+    while (winner == 0 && moves < 9) {
+        int slot;
+        cout << "Player " << currentPlayer << " [" << currentMarker << "], enter your move (1-9): ";
+        cin >> slot;
+
+        if (slot < 1 || slot > 9) {
+            cout << "Invalid slot. Try again.\n";
+            continue;
+        }
+
+        if (!placeMarker(slot)) {
+            cout << "Slot already taken. Try again.\n";
+            continue;
+        }
+
+        drawBoard();
+        winner = checkWinner();
+        swapPlayerAndMarker();
+        moves++;
+    }
+
+    if (winner != 0)
+        cout << "Player " << winner << " wins!\n";
+    else
+        cout << "It's a draw!\n";
+
+    return 0;
+}
